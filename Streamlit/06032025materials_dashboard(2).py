@@ -688,7 +688,7 @@ if page == "Material Demand":
         if st.session_state.input["scenario_option"] == 1:
             
             st.session_state.pv_production[0:pv_years] = st.session_state["default_input_pv_production"][0:pv_years]
-            st.session_state.pv_market_share[0:pv_years] = st.session_state["default_input_pv_production"][0:pv_years]
+            st.session_state.pv_market_share[0:pv_years] = st.session_state["default_input_pv_market_share"][0:pv_years]
             st.session_state.pv_material_intensity[0:pv_years] = st.session_state["default_input_pv_material_intensity"][0:pv_years]
         ind = years_list.index(pv_year)
         pv_annual_production = st.number_input(f"Enter the PV annual production (GWp) for {years_list[ind]}", min_value=0.0, key=f"annual_pv{years_list[ind]}")
