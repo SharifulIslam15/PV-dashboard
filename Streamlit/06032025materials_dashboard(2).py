@@ -8,6 +8,10 @@ from io import BytesIO
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
+import time
+import uuid
+import csv
+from pathlib import Path
 
 # import os
 # import sys
@@ -51,6 +55,90 @@ class Dashboard:
             'get_res': False,
             
         }
+#New
+BASE_DIR = Path.cwd()
+OUTPUT_DIR = BASE_DIR / "data" / "output"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = OUTPUT_DIR / "dashboard_usage_log.csv"
+
+
+def init_tracking():
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+
+    if "session_start_time" not in st.session_state:
+        st.session_state.session_start_time = time.time()
+
+    if "current_page_tracked" not in st.session_state:
+        st.session_state.current_page_tracked = None
+
+    if "page_enter_time" not in st.session_state:
+        st.session_state.page_enter_time = time.time()
+
+    if "page_visit_counts" not in st.session_state:
+        st.session_state.page_visit_counts = {}
+
+    if "page_time_spent" not in st.session_state:
+        st.session_state.page_time_spent = {}
+
+    if "button_click_counts" not in st.session_state:
+        st.session_state.button_click_counts = {}
+
+
+def log_event(event_type, page="", element="", value=""):
+    file_exists = os.path.exists(LOG_FILE)
+    with open(LOG_FILE, "a", newline="") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow([
+                "timestamp",
+                "session_id",
+                "event_type",
+                "page",
+                "element",
+                "value",
+                "elapsed_session_sec"
+            ])
+        writer.writerow([
+            round(time.time(), 2),
+            st.session_state.session_id,
+            event_type,
+            page,
+            element,
+            value,
+            round(time.time() - st.session_state.session_start_time, 2)
+        ])
+
+
+def track_page(page_name):
+    now = time.time()
+
+    if st.session_state.current_page_tracked is not None and st.session_state.current_page_tracked != page_name:
+        prev_page = st.session_state.current_page_tracked
+        duration = now - st.session_state.page_enter_time
+        st.session_state.page_time_spent[prev_page] = st.session_state.page_time_spent.get(prev_page, 0) + duration
+        log_event("page_exit", prev_page, value=round(duration, 2))
+
+    if st.session_state.current_page_tracked != page_name:
+        st.session_state.current_page_tracked = page_name
+        st.session_state.page_enter_time = now
+        st.session_state.page_visit_counts[page_name] = st.session_state.page_visit_counts.get(page_name, 0) + 1
+        log_event("page_enter", page_name)
+
+
+def track_click(page_name, button_name):
+    key = f"{page_name}::{button_name}"
+    st.session_state.button_click_counts[key] = st.session_state.button_click_counts.get(key, 0) + 1
+    log_event("click", page_name, button_name)
+
+
+def get_click_ratio(page_name, button_name):
+    key = f"{page_name}::{button_name}"
+    clicks = st.session_state.button_click_counts.get(key, 0)
+    visits = st.session_state.page_visit_counts.get(page_name, 0)
+    return clicks / visits if visits else 0
+
+#End
 
 # initialise the session state
 if "input" not in st.session_state:
@@ -222,9 +310,9 @@ if "MD" not in st.session_state.output:
     st.session_state.output["MD"]= ""
 if "MP" not in st.session_state.output:
     st.session_state.output["MP"]= ""
-    
-
-
+#New    
+init_tracking()
+#End
 
 # Get the absolute path of the image file
 #image_path = os.path.abspath('C:/Users/franc/OneDrive/Desktop/Materials Dashboard/msu.jpg')
@@ -1649,7 +1737,28 @@ if page == "Calculate Results":
             #key=f"download127",
             #file_name=f"output.csv",
             #mime="text/csv",
-        #)                  
+        #) 
+        #New
+        st.divider()
+        st.subheader("Usage Tracking Summary")
+
+        total_session_time = time.time() - st.session_state.session_start_time
+        st.write(f"Session ID: {st.session_state.session_id}")
+        st.write(f"Total session time: {round(total_session_time, 2)} seconds")
+        st.write("Page visits:")
+        st.write(st.session_state.page_visit_counts)
+        st.write("Button clicks:")
+        st.write(st.session_state.button_click_counts)
+        st.write("Page time spent (seconds):")
+        st.write({k: round(v, 2) for k, v in st.session_state.page_time_spent.items()})
+        st.write("Click ratios:")
+        st.write({
+            "Project Description Save Ratio": round(get_click_ratio("Project Description", "Save"), 2),
+            "Material Supply Save Ratio": round(get_click_ratio("Material Supply", "Save"), 2),
+            "Material Demand Save Ratio": round(get_click_ratio("Material Demand", "Save"), 2),
+            "Calculate Ratio": round(get_click_ratio("Calculate Results", "Calculate"), 2),
+        })
+        #End
                                         
 
 # Page 8: Plot Results
