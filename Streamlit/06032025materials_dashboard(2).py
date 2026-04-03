@@ -327,6 +327,8 @@ st.sidebar.title("Material Availability Assessment Dashboard")
 #"Home"
 page = st.sidebar.selectbox("Dashboard Navigation", ["Project Description","Material Supply", "Material Demand", "Supply Gap and Price Effect", "Modelling Inputs Review", "Calculate Results", "Plot Results"])
 
+#Change (1 line)
+track_page(page)
 #st.sidebar.subheader("Home")
 st.sidebar.subheader("Project Description")
 st.sidebar.subheader("Material Supply")
