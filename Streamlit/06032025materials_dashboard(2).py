@@ -466,7 +466,7 @@ if page == "Material Supply":
     if selected_supply_option == "Manually input annual production":
         supply_option = 1
         if "default_input_mine" not in st.session_state:
-            st.session_state["default_input_mine"] = [107,107,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22]
+            st.session_state["default_input_mine"] = [22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22]
         if "mine_prod" not in st.session_state:
             st.session_state.mine_prod = np.zeros(30)
         if st.session_state.input["scenario_option"] == 1:
