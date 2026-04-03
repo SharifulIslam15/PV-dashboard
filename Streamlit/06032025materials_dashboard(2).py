@@ -1749,11 +1749,12 @@ if page == "Calculate Results":
         st.write(f"Total session time: {round(total_session_time, 2)} seconds")
         st.write("Page visits:")
         st.write(st.session_state.page_visit_counts)
-        st.write("Button clicks:")
+        #Change
+        
         st.write(st.session_state.button_click_counts)
         st.write("Page time spent (seconds):")
         st.write({k: round(v, 2) for k, v in st.session_state.page_time_spent.items()})
-        st.write("Click ratios:")
+        #Change
         st.write({
             "Project Description Save Ratio": round(get_click_ratio("Project Description", "Save"), 2),
             "Material Supply Save Ratio": round(get_click_ratio("Material Supply", "Save"), 2),
